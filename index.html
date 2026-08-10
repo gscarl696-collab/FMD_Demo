@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FMD — Football Management Dashboard (Demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0D2A57; --royal:#1C4F99; --royal-light:#2F6FD6; --yellow:#FFC834; --yellow-deep:#E8AC00;
+  --white:#FFFFFF; --bg:#EFF5FF; --surface:#FFFFFF; --text-dark:#0D2A57; --text-muted:#5C7599;
+  --border:#DCE8FA; --green:#1E9E6B; --amber:#B8860B; --red:#D6455B; --radius:16px;
+  --shadow:0 10px 30px -12px rgba(13,42,87,0.25);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{font-family:'Inter',sans-serif; background:var(--bg); color:var(--text-dark); line-height:1.5;}
+h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif; letter-spacing:-0.01em;}
+.mono{font-family:'JetBrains Mono',monospace;}
+.hidden{display:none !important;}
+a{color:inherit; text-decoration:none;}
+button{font-family:inherit; cursor:pointer; border:none;}
+input,select,textarea{font-family:inherit; font-size:0.95rem;}
+.container{max-width:1180px; margin:0 auto; padding:0 24px;}
+
+/* ---------- DEMO BADGE ---------- */
+.demo-badge{
+  position:fixed; top:0; left:0; right:0; z-index:999; background:var(--navy); color:var(--yellow);
+  text-align:center; font-family:'JetBrains Mono',monospace; font-size:0.78rem; letter-spacing:0.06em;
+  padding:7px 10px; font-weight:500;
+}
+.demo-badge b{color:#fff;}
+body{padding-top:32px;}
+
+/* ---------- NAVBAR ---------- */
+.navbar{background:var(--navy); color:#fff; position:sticky; top:32px; z-index:100; box-shadow:0 4px 20px rgba(13,42,87,0.15);}
+.navbar-inner{display:flex; align-items:center; justify-content:space-between; padding:14px 24px; max-width:1180px; margin:0 auto;}
+.brand{display:flex; align-items:center; gap:12px;}
+.brand-mark{width:38px; height:38px; border-radius:10px; background:linear-gradient(135deg,var(--yellow),var(--yellow-deep)); display:flex; align-items:center; justify-content:center; font-weight:700; color:var(--navy); font-family:'Space Grotesk',sans-serif; font-size:1.1rem;}
+.brand-text{display:flex; flex-direction:column; line-height:1.15;}
+.brand-text b{font-size:1.05rem; font-family:'Space Grotesk',sans-serif;}
+.brand-text span{font-size:0.72rem; color:#9DB8E8; letter-spacing:0.04em;}
+.nav-links{display:flex; align-items:center; gap:28px; font-size:0.92rem; font-weight:500;}
+.nav-links a{opacity:0.85; transition:opacity 0.15s;}
+.nav-links a:hover{opacity:1;}
+.btn{padding:10px 20px; border-radius:10px; font-weight:600; font-size:0.9rem; transition:transform 0.15s, box-shadow 0.15s; display:inline-flex; align-items:center; gap:8px;}
+.btn:active{transform:scale(0.97);}
+.btn-yellow{background:var(--yellow); color:var(--navy);}
+.btn-yellow:hover{box-shadow:0 6px 18px rgba(255,200,52,0.4);}
+.btn-outline-light{background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,0.35) !important;}
+.btn-outline-light:hover{background:rgba(255,255,255,0.08);}
+.btn-royal{background:var(--royal); color:#fff;}
+.btn-royal:hover{box-shadow:0 6px 18px rgba(28,79,153,0.35);}
+.btn-ghost{background:transparent; color:var(--text-muted);}
+.btn-ghost:hover{color:var(--text-dark);}
+.btn-danger{background:#FDECEF; color:var(--red);}
+.btn-danger:hover{background:#FBDCE1;}
+.btn-sm{padding:7px 14px; font-size:0.82rem; border-radius:8px;}
+
+/* ---------- HERO ---------- */
+.hero{background:linear-gradient(160deg,var(--navy) 0%, var(--royal) 100%); color:#fff; padding:72px 0 90px; position:relative; overflow:hidden;}
+.hero::after{content:""; position:absolute; right:-120px; top:-120px; width:420px; height:420px; border-radius:50%; background:radial-gradient(circle,rgba(255,200,52,0.18),transparent 70%);}
+.hero-inner{display:grid; grid-template-columns:1.1fr 0.9fr; gap:48px; align-items:center; position:relative;}
+.eyebrow{display:inline-flex; align-items:center; gap:8px; background:rgba(255,200,52,0.14); color:var(--yellow); padding:6px 14px; border-radius:999px; font-size:0.78rem; font-weight:600; letter-spacing:0.05em; margin-bottom:20px;}
+.eyebrow::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--yellow);}
+.hero h1{font-size:2.6rem; line-height:1.12; margin-bottom:18px;}
+.hero h1 span{color:var(--yellow);}
+.hero p{font-size:1.05rem; color:#C4D6F5; max-width:480px; margin-bottom:30px;}
+.hero-actions{display:flex; gap:14px;}
+.hero-stats{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:44px; max-width:480px;}
+.stat-chip{background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:14px 12px;}
+.stat-chip b{display:block; font-family:'Space Grotesk',sans-serif; font-size:1.4rem; color:var(--yellow);}
+.stat-chip span{font-size:0.72rem; color:#9DB8E8;}
+.hero-visual{background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:20px; padding:22px; backdrop-filter:blur(6px);}
+.hero-visual-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;}
+.hero-visual-header b{font-size:0.85rem; color:#fff;}
+.live-dot{display:inline-flex; align-items:center; gap:6px; font-size:0.72rem; color:#8FE3B5; font-weight:600;}
+.live-dot::before{content:""; width:7px; height:7px; border-radius:50%; background:#3FD98A; box-shadow:0 0 0 4px rgba(63,217,138,0.2);}
+.mini-row{display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,0.08); font-size:0.85rem;}
+.mini-row:last-child{border:none;}
+.mini-tag{font-size:0.68rem; padding:3px 9px; border-radius:999px; font-weight:600;}
+.tag-active{background:rgba(63,217,138,0.18); color:#8FE3B5;}
+.tag-pending{background:rgba(255,200,52,0.18); color:var(--yellow);}
+
+/* ---------- SECTION ---------- */
+.section{padding:64px 0;}
+.section-head{text-align:center; max-width:600px; margin:0 auto 42px;}
+.section-head .eyebrow{background:rgba(28,79,153,0.08); color:var(--royal);}
+.section-head .eyebrow::before{background:var(--royal);}
+.section-head h2{font-size:2rem; margin-bottom:10px;}
+.section-head p{color:var(--text-muted);}
+
+/* ---------- SQUAD CARDS ---------- */
+.squad-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:18px;}
+.squad-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; transition:transform 0.18s, box-shadow 0.18s;}
+.squad-card:hover{transform:translateY(-4px); box-shadow:var(--shadow);}
+.squad-photo{height:150px; background:linear-gradient(135deg,var(--royal-light),var(--royal)); display:flex; align-items:center; justify-content:center; color:#fff; font-family:'Space Grotesk',sans-serif; font-size:2.2rem; font-weight:700; position:relative;}
+.squad-num{position:absolute; top:10px; left:10px; background:rgba(0,0,0,0.25); color:#fff; font-size:0.72rem; padding:3px 9px; border-radius:999px; font-weight:600;}
+.squad-body{padding:14px 16px;}
+.squad-body h4{font-size:0.98rem; margin-bottom:2px;}
+.squad-body span{font-size:0.78rem; color:var(--text-muted);}
+.squad-cat{display:inline-block; margin-top:8px; font-size:0.7rem; font-weight:600; background:var(--bg); color:var(--royal); padding:3px 10px; border-radius:999px;}
+
+/* ---------- SCHEDULE ---------- */
+.schedule-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+.sched-card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px; display:flex; gap:16px; align-items:flex-start;}
+.sched-date{background:var(--navy); color:#fff; border-radius:10px; padding:10px 14px; text-align:center; min-width:64px;}
+.sched-date b{display:block; font-family:'Space Grotesk',sans-serif; font-size:1.3rem;}
+.sched-date span{font-size:0.68rem; color:var(--yellow); text-transform:uppercase; letter-spacing:0.04em;}
+.sched-info h4{font-size:0.98rem; margin-bottom:4px;}
+.sched-info p{font-size:0.83rem; color:var(--text-muted);}
+
+/* ---------- LOGIN MODAL ---------- */
+.modal-overlay{position:fixed; inset:0; background:rgba(13,42,87,0.55); backdrop-filter:blur(3px); z-index:500; display:flex; align-items:center; justify-content:center; padding:20px;}
+.login-card{background:#fff; border-radius:20px; padding:40px 36px; width:100%; max-width:400px; box-shadow:0 30px 60px -20px rgba(13,42,87,0.35); position:relative;}
+.login-close{position:absolute; top:16px; right:16px; width:32px; height:32px; border-radius:50%; background:var(--bg); display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:1.1rem;}
+.login-head{text-align:center; margin-bottom:26px;}
+.login-head .brand-mark{margin:0 auto 14px;}
+.login-head h3{font-size:1.3rem; margin-bottom:4px;}
+.login-head p{font-size:0.85rem; color:var(--text-muted);}
+.field{margin-bottom:16px;}
+.field label{display:block; font-size:0.8rem; font-weight:600; margin-bottom:6px; color:var(--text-dark);}
+.field input{width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; background:var(--bg); transition:border-color 0.15s;}
+.field input:focus{outline:none; border-color:var(--royal-light); background:#fff;}
+.login-hint{background:#FFF8E6; border:1px dashed var(--yellow-deep); border-radius:10px; padding:10px 12px; font-size:0.78rem; color:#8A6600; margin-bottom:18px; text-align:center;}
+.login-error{background:#FDECEF; color:var(--red); font-size:0.82rem; padding:9px 12px; border-radius:8px; margin-bottom:14px; text-align:center;}
+.login-submit{width:100%; padding:13px; border-radius:10px;}
+
+/* ---------- ADMIN SHELL ---------- */
+.admin-shell{display:none; min-height:calc(100vh - 32px);}
+.admin-shell.active{display:flex;}
+.sidebar{width:238px; background:var(--navy); color:#fff; flex-shrink:0; padding:20px 14px; position:sticky; top:32px; height:calc(100vh - 32px); overflow-y:auto;}
+.side-brand{display:flex; align-items:center; gap:10px; padding:8px 8px 20px; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:16px;}
+.side-nav button{width:100%; display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:10px; background:transparent; color:#C4D6F5; font-size:0.88rem; font-weight:500; margin-bottom:3px; text-align:left; transition:background 0.15s;}
+.side-nav button:hover{background:rgba(255,255,255,0.06);}
+.side-nav button.active{background:var(--royal); color:#fff;}
+.side-icon{width:18px; text-align:center;}
+.side-logout{margin-top:16px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.1);}
+.admin-main{flex:1; padding:28px 32px; min-width:0;}
+.admin-topbar{display:flex; justify-content:space-between; align-items:center; margin-bottom:26px;}
+.admin-topbar h2{font-size:1.5rem;}
+.admin-topbar p{font-size:0.85rem; color:var(--text-muted); margin-top:2px;}
+.pill-user{display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--border); padding:6px 14px 6px 6px; border-radius:999px;}
+.pill-avatar{width:30px; height:30px; border-radius:50%; background:var(--yellow); display:flex; align-items:center; justify-content:center; font-size:0.78rem; font-weight:700; color:var(--navy);}
+.pill-user span{font-size:0.82rem; font-weight:600;}
+
+.stat-cards{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:26px;}
+.stat-card{background:#fff; border:1px solid var(--border); border-radius:14px; padding:18px 20px;}
+.stat-card b{display:block; font-family:'Space Grotesk',sans-serif; font-size:1.7rem; margin-bottom:2px;}
+.stat-card span{font-size:0.78rem; color:var(--text-muted);}
+.panel{background:#fff; border:1px solid var(--border); border-radius:16px; padding:22px; margin-bottom:22px;}
+.panel-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;}
+.panel-head h3{font-size:1.08rem;}
+
+table{width:100%; border-collapse:collapse; font-size:0.86rem;}
+th{text-align:left; padding:10px 12px; background:var(--bg); color:var(--text-muted); font-weight:600; font-size:0.76rem; text-transform:uppercase; letter-spacing:0.03em;}
+th:first-child{border-radius:8px 0 0 8px;} th:last-child{border-radius:0 8px 8px 0;}
+td{padding:12px; border-bottom:1px solid var(--border); vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+.name-cell{display:flex; align-items:center; gap:10px;}
+.mini-avatar{width:34px; height:34px; border-radius:9px; background:linear-gradient(135deg,var(--royal-light),var(--royal)); color:#fff; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; font-family:'Space Grotesk',sans-serif;}
+.name-cell b{display:block; font-size:0.86rem;}
+.name-cell span{font-size:0.74rem; color:var(--text-muted); font-family:'JetBrains Mono',monospace;}
+.badge{font-size:0.72rem; padding:4px 10px; border-radius:999px; font-weight:600; display:inline-block;}
+.badge-active{background:#E3F7ED; color:var(--green);}
+.badge-pending{background:#FFF3D6; color:var(--amber);}
+.badge-inactive{background:#F1F2F5; color:#7A8296;}
+.row-actions{display:flex; gap:6px;}
+.icon-btn{width:30px; height:30px; border-radius:8px; background:var(--bg); display:flex; align-items:center; justify-content:center; font-size:0.9rem; color:var(--text-muted); transition:background 0.15s;}
+.icon-btn:hover{background:var(--border);}
+.icon-btn.danger:hover{background:#FDECEF; color:var(--red);}
+
+.empty-note{text-align:center; padding:36px 20px; color:var(--text-muted); font-size:0.88rem;}
+
+/* form modal */
+.form-modal{background:#fff; border-radius:18px; padding:30px; width:100%; max-width:440px; max-height:88vh; overflow-y:auto;}
+.form-modal h3{margin-bottom:20px;}
+.form-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+.form-grid .field.full{grid-column:1/-1;}
+.form-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:20px;}
+
+.toast-wrap{position:fixed; bottom:22px; right:22px; z-index:900; display:flex; flex-direction:column; gap:10px;}
+.toast{background:var(--navy); color:#fff; padding:13px 20px; border-radius:12px; font-size:0.86rem; box-shadow:0 12px 30px rgba(13,42,87,0.3); display:flex; align-items:center; gap:10px; animation:slideIn 0.25s ease;}
+.toast.success{background:var(--green);} .toast.error{background:var(--red);}
+@keyframes slideIn{from{opacity:0; transform:translateX(20px);} to{opacity:1; transform:translateX(0);}}
+
+.qr-scan-box{border:2px dashed var(--border); border-radius:16px; padding:44px 20px; text-align:center; margin-bottom:18px;}
+.qr-scan-box .icon{font-size:2.4rem; margin-bottom:10px;}
+.report-card{background:linear-gradient(160deg,var(--navy),var(--royal)); color:#fff; border-radius:16px; padding:24px; margin-bottom:18px;}
+.report-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; margin-top:16px;}
+.report-metric{background:rgba(255,255,255,0.08); border-radius:12px; padding:14px;}
+.report-metric b{display:block; font-family:'Space Grotesk',sans-serif; font-size:1.5rem; color:var(--yellow);}
+.report-metric span{font-size:0.72rem; color:#C4D6F5;}
+.bar-row{display:flex; align-items:center; gap:12px; margin-bottom:10px;}
+.bar-row span{width:100px; font-size:0.8rem; flex-shrink:0;}
+.bar-track{flex:1; height:9px; background:var(--bg); border-radius:99px; overflow:hidden;}
+.bar-fill{height:100%; background:linear-gradient(90deg,var(--royal-light),var(--royal)); border-radius:99px;}
+
+footer{background:var(--navy); color:#9DB8E8; text-align:center; padding:26px 0; font-size:0.82rem;}
+
+@media (max-width:860px){
+  .hero-inner{grid-template-columns:1fr;} .hero-stats{grid-template-columns:repeat(3,1fr);}
+  .schedule-grid{grid-template-columns:1fr;} .nav-links{display:none;}
+  .stat-cards{grid-template-columns:repeat(2,1fr);}
+  .admin-shell.active{flex-direction:column;}
+  .sidebar{width:100%; height:auto; position:relative; top:0; display:flex; flex-wrap:wrap; gap:6px;}
+  .side-nav{display:flex; flex-wrap:wrap; gap:6px; flex:1;}
+  .side-nav button{width:auto; margin:0;}
+  .side-logout{width:100%; margin-top:8px; padding-top:8px;}
+  .form-grid{grid-template-columns:1fr;}
+  table{display:block; overflow-x:auto;}
+}
+</style>
+</head>
+<body>
+
+<div class="demo-badge">⚡ FMD DEMO MODE — sample data only, nothing here is saved or real &nbsp;·&nbsp; Admin login: <b>SIIDEX2026</b> / <b>SIIDEX2026</b></div>
+
+<!-- ===================== NAVBAR ===================== -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <div class="brand">
+      <div class="brand-mark">F</div>
+      <div class="brand-text"><b>FMD</b><span>Football Management Dashboard</span></div>
+    </div>
+    <div class="nav-links">
+      <a href="#squad">Squad</a>
+      <a href="#schedule">Schedule</a>
+      <a href="#features">Features</a>
+      <button class="btn btn-yellow btn-sm" onclick="openLogin()">Admin Login</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ===================== PUBLIC VIEW ===================== -->
+<div id="publicView">
+
+  <section class="hero">
+    <div class="container hero-inner">
+      <div>
+        <div class="eyebrow">LIVE DEMO — RIVERSIDE UNITED FC</div>
+        <h1>One dashboard for every part of running a <span>football club.</span></h1>
+        <p>Squad registration, QR attendance, coach evaluations, and performance reports — all in one place. This is a working demo with sample data, showing exactly how FMD looks and feels.</p>
+        <div class="hero-actions">
+          <button class="btn btn-yellow" onclick="openLogin()">Try the Admin Dashboard →</button>
+          <a href="#squad" class="btn btn-outline-light">View Squad</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-chip"><b>32</b><span>Registered Players</span></div>
+          <div class="stat-chip"><b>4</b><span>Age Categories</span></div>
+          <div class="stat-chip"><b>96%</b><span>Attendance Rate</span></div>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-visual-header"><b>Today's Session</b><span class="live-dot">LIVE</span></div>
+        <div class="mini-row"><span>U11 Training — 4:30 PM</span><span class="mini-tag tag-active">18 checked in</span></div>
+        <div class="mini-row"><span>Ahmad Rizal bin Hassan</span><span class="mini-tag tag-active">Present</span></div>
+        <div class="mini-row"><span>Wei Jian Tan</span><span class="mini-tag tag-active">Present</span></div>
+        <div class="mini-row"><span>Kavin Raj a/l Kumar</span><span class="mini-tag tag-pending">Pending</span></div>
+        <div class="mini-row"><span>Danish Iqbal</span><span class="mini-tag tag-pending">Pending</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="squad">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow">SAMPLE DATA</div>
+        <h2>Meet the Squad</h2>
+        <p>A preview of the public squad directory — every player gets a profile, category, and Digital ID.</p>
+      </div>
+      <div class="squad-grid" id="squadGrid"></div>
+    </div>
+  </section>
+
+  <section class="section" id="schedule" style="background:#fff;">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow">SAMPLE DATA</div>
+        <h2>Upcoming Sessions</h2>
+        <p>Training and tournament schedules, visible to parents and players automatically.</p>
+      </div>
+      <div class="schedule-grid" id="scheduleGrid"></div>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-head">
+        <div class="eyebrow">WHAT'S INSIDE</div>
+        <h2>Built for how clubs actually run</h2>
+      </div>
+      <div class="squad-grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr));">
+        <div class="panel" style="margin:0;"><h3 style="margin-bottom:8px;">📋 Player Management</h3><p style="color:var(--text-muted); font-size:0.88rem;">Full profiles, auto-generated Player IDs, category tracking by age, and Digital ID cards with QR codes.</p></div>
+        <div class="panel" style="margin:0;"><h3 style="margin-bottom:8px;">📷 QR Attendance</h3><p style="color:var(--text-muted); font-size:0.88rem;">Scan a player's ID at training to log attendance instantly — no paper sheets, no manual counting.</p></div>
+        <div class="panel" style="margin:0;"><h3 style="margin-bottom:8px;">📊 Performance Reports</h3><p style="color:var(--text-muted); font-size:0.88rem;">Coaches score players after every session; parents can look up reports directly, no login needed.</p></div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ===================== LOGIN MODAL ===================== -->
+<div class="modal-overlay hidden" id="loginModal">
+  <div class="login-card">
+    <button class="login-close" onclick="closeLogin()">✕</button>
+    <div class="login-head">
+      <div class="brand-mark">F</div>
+      <h3>Admin Login</h3>
+      <p>Sign in to the FMD demo dashboard</p>
+    </div>
+    <div class="login-hint">Demo credentials — ID: <b>SIIDEX2026</b> &nbsp;/&nbsp; Password: <b>SIIDEX2026</b></div>
+    <div class="login-error hidden" id="loginError">Incorrect ID or password. Try SIIDEX2026 / SIIDEX2026.</div>
+    <div class="field"><label>Admin ID</label><input type="text" id="loginId" placeholder="e.g. SIIDEX2026"></div>
+    <div class="field"><label>Password</label><input type="password" id="loginPw" placeholder="Enter password"></div>
+    <button class="btn btn-royal login-submit" onclick="attemptLogin()">Log In</button>
+  </div>
+</div>
+
+<!-- ===================== ADMIN SHELL ===================== -->
+<div class="admin-shell" id="adminShell">
+  <aside class="sidebar">
+    <div class="side-brand"><div class="brand-mark">F</div><div class="brand-text"><b>FMD</b><span>Admin Panel</span></div></div>
+    <div class="side-nav" id="sideNav">
+      <button class="active" data-tab="overview" onclick="switchTab('overview')"><span class="side-icon">◈</span> Overview</button>
+      <button data-tab="players" onclick="switchTab('players')"><span class="side-icon">👤</span> Player Management</button>
+      <button data-tab="attendance" onclick="switchTab('attendance')"><span class="side-icon">📷</span> Attendance</button>
+      <button data-tab="schedule" onclick="switchTab('schedule')"><span class="side-icon">📅</span> Training &amp; Tournaments</button>
+      <button data-tab="performance" onclick="switchTab('performance')"><span class="side-icon">📈</span> Performance Reports</button>
+    </div>
+    <div class="side-logout"><button class="btn btn-outline-light btn-sm" style="width:100%; justify-content:center;" onclick="logout()">← Log Out</button></div>
+  </aside>
+
+  <main class="admin-main">
+    <div class="admin-topbar">
+      <div><h2 id="tabTitle">Overview</h2><p id="tabSubtitle">A snapshot of Riverside United FC</p></div>
+      <div class="pill-user"><div class="pill-avatar">SX</div><span>SIIDEX2026</span></div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div id="tab-overview" class="tab-panel">
+      <div class="stat-cards">
+        <div class="stat-card"><b style="color:var(--royal);">32</b><span>Total Players</span></div>
+        <div class="stat-card"><b style="color:var(--green);">96%</b><span>Attendance This Month</span></div>
+        <div class="stat-card"><b style="color:var(--amber);">3</b><span>Pending Registrations</span></div>
+        <div class="stat-card"><b style="color:var(--navy);">7</b><span>Sessions This Week</span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Recent Activity</h3></div>
+        <table>
+          <thead><tr><th>Event</th><th>Detail</th><th>When</th></tr></thead>
+          <tbody>
+            <tr><td>New Registration</td><td>Farhan Danial submitted the sign-up form</td><td class="mono">2 hours ago</td></tr>
+            <tr><td>Attendance Scanned</td><td>U11 Training — 18 of 20 players checked in</td><td class="mono">Yesterday</td></tr>
+            <tr><td>Evaluation Completed</td><td>Coach Aiman rated 12 players</td><td class="mono">2 days ago</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PLAYERS -->
+    <div id="tab-players" class="tab-panel hidden">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Player Management <span style="font-weight:400; color:var(--text-muted); font-size:0.8rem;">(add/edit is live in this demo — nothing saves after refresh)</span></h3>
+          <button class="btn btn-royal btn-sm" onclick="openPlayerForm()">+ Add Player</button>
+        </div>
+        <table>
+          <thead><tr><th>Player</th><th>Category</th><th>Age</th><th>Status</th><th></th></tr></thead>
+          <tbody id="playersBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ATTENDANCE -->
+    <div id="tab-attendance" class="tab-panel hidden">
+      <div class="panel">
+        <div class="panel-head"><h3>Scan Attendance</h3></div>
+        <div class="qr-scan-box">
+          <div class="icon">📷</div>
+          <p style="color:var(--text-muted); margin-bottom:14px; font-size:0.88rem;">Point a camera at a player's Digital ID QR code</p>
+          <button class="btn btn-royal btn-sm" onclick="simulateScan()">Simulate a Scan</button>
+        </div>
+        <table>
+          <thead><tr><th>Player</th><th>Status</th><th>Time</th></tr></thead>
+          <tbody id="attendanceBody"><tr><td colspan="3" class="empty-note">No scans yet — try "Simulate a Scan" above.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div id="tab-schedule" class="tab-panel hidden">
+      <div class="panel">
+        <div class="panel-head"><h3>Training &amp; Tournaments</h3><button class="btn btn-royal btn-sm" onclick="showToast('This would open a scheduling form — not wired up in the demo.','success')">+ Add Session</button></div>
+        <table>
+          <thead><tr><th>Type</th><th>Title</th><th>Date</th><th>Category</th></tr></thead>
+          <tbody id="scheduleBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PERFORMANCE -->
+    <div id="tab-performance" class="tab-panel hidden">
+      <div class="report-card">
+        <h3 style="font-size:1.1rem;">Ahmad Rizal bin Hassan — Session Report</h3>
+        <p style="color:#C4D6F5; font-size:0.85rem; margin-top:4px;">U11 · Training Session · Evaluated by Coach Aiman</p>
+        <div class="report-grid">
+          <div class="report-metric"><b>8.4</b><span>Overall Rating</span></div>
+          <div class="report-metric"><b>9</b><span>Technique</span></div>
+          <div class="report-metric"><b>8</b><span>Positioning</span></div>
+          <div class="report-metric"><b>8</b><span>Teamwork</span></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Skill Breakdown</h3></div>
+        <div class="bar-row"><span>Ball Control</span><div class="bar-track"><div class="bar-fill" style="width:90%;"></div></div></div>
+        <div class="bar-row"><span>Passing</span><div class="bar-track"><div class="bar-fill" style="width:82%;"></div></div></div>
+        <div class="bar-row"><span>First Touch</span><div class="bar-track"><div class="bar-fill" style="width:76%;"></div></div></div>
+        <div class="bar-row"><span>Awareness</span><div class="bar-track"><div class="bar-fill" style="width:85%;"></div></div></div>
+        <div class="bar-row"><span>Discipline</span><div class="bar-track"><div class="bar-fill" style="width:94%;"></div></div></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ===================== PLAYER FORM MODAL ===================== -->
+<div class="modal-overlay hidden" id="playerFormModal">
+  <div class="form-modal">
+    <h3 id="playerFormTitle">Add Player</h3>
+    <div class="form-grid">
+      <div class="field full"><label>Full Name</label><input id="pf_name" placeholder="e.g. Muhammad Aiman"></div>
+      <div class="field"><label>Age</label><input id="pf_age" type="number" min="5" max="14" placeholder="e.g. 10"></div>
+      <div class="field"><label>School</label><input id="pf_school" placeholder="e.g. SK Riverside"></div>
+      <div class="field full"><label>Status</label>
+        <select id="pf_status" style="width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; background:var(--bg);">
+          <option>Pending</option><option>Active</option><option>Inactive</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('playerFormModal')">Cancel</button>
+      <button class="btn btn-royal btn-sm" onclick="savePlayer()">Save Player</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<footer><div class="container">FMD Demo — Football Management Dashboard · Sample data only · Not connected to any real club</div></footer>
+
+<script>
+/* =========================================================================
+   ALL SAMPLE DATA — everything below is fictional, generated for this demo.
+   Nothing here reads from or writes to any real database or server.
+   ========================================================================= */
+const DEMO_ID = 'SIIDEX2026';
+const DEMO_PW = 'SIIDEX2026';
+
+let state = {
+  editingPlayerId: null,
+  players: [
+    {id:'PLR-U9-001', name:'Ahmad Rizal bin Hassan', age:9, category:'U9', school:'SK Riverside', status:'Active'},
+    {id:'PLR-U9-002', name:'Wei Jian Tan', age:9, category:'U9', school:'SJK(C) Riverside', status:'Active'},
+    {id:'PLR-U11-001', name:'Kavin Raj a/l Kumar', age:11, category:'U11', school:'SK Bukit Merah', status:'Active'},
+    {id:'PLR-U11-002', name:'Danish Iqbal bin Zamri', age:11, category:'U11', school:'SK Riverside', status:'Active'},
+    {id:'PLR-U11-003', name:'Farhan Danial bin Rosli', age:11, category:'U11', school:'SK Taman Jaya', status:'Pending'},
+    {id:'PLR-U13-001', name:'Yusof Haziq bin Kamal', age:13, category:'U13', school:'SMK Riverside', status:'Active'},
+    {id:'PLR-U13-002', name:'Nathaniel Cruz', age:13, category:'U13', school:'SMK Bukit Merah', status:'Inactive'},
+  ],
+  schedule: [
+    {type:'Training', title:'U9 Skills Session', date:'12 Aug 2026', category:'U9'},
+    {type:'Training', title:'U11 Match Prep', date:'13 Aug 2026', category:'U11'},
+    {type:'Tournament', title:'Riverside Cup — Round 1', date:'16 Aug 2026', category:'U13'},
+    {type:'Training', title:'U13 Fitness & Drills', date:'19 Aug 2026', category:'U13'},
+  ]
+};
+
+function esc(v){ return String(v==null?'':v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function initials(name){ const p = name.trim().split(/\s+/); return (p[0][0]||'') + (p.length>1?p[p.length-1][0]:''); }
+
+/* ---------- PUBLIC SQUAD + SCHEDULE PREVIEW ---------- */
+function renderPublicSquad(){
+  const grid = document.getElementById('squadGrid');
+  grid.innerHTML = state.players.filter(p=>p.status==='Active').map(p => `
+    <div class="squad-card">
+      <div class="squad-photo">${esc(initials(p.name))}<span class="squad-num">${esc(p.category)}</span></div>
+      <div class="squad-body"><h4>${esc(p.name)}</h4><span>${esc(p.school)}</span><div class="squad-cat">${esc(p.category)} · Age ${esc(p.age)}</div></div>
+    </div>`).join('');
+}
+function renderPublicSchedule(){
+  const grid = document.getElementById('scheduleGrid');
+  grid.innerHTML = state.schedule.map(s => {
+    const [day, mon] = s.date.split(' ');
+    return `<div class="sched-card">
+      <div class="sched-date"><b>${esc(day)}</b><span>${esc(mon)}</span></div>
+      <div class="sched-info"><h4>${esc(s.title)}</h4><p>${esc(s.type)} · ${esc(s.category)} category</p></div>
+    </div>`;
+  }).join('');
+}
+
+/* ---------- LOGIN ---------- */
+function openLogin(){ document.getElementById('loginModal').classList.remove('hidden'); document.getElementById('loginError').classList.add('hidden'); document.getElementById('loginId').value=''; document.getElementById('loginPw').value=''; }
+function closeLogin(){ document.getElementById('loginModal').classList.add('hidden'); }
+function attemptLogin(){
+  const id = document.getElementById('loginId').value.trim();
+  const pw = document.getElementById('loginPw').value.trim();
+  if(id === DEMO_ID && pw === DEMO_PW){
+    closeLogin();
+    document.getElementById('publicView').classList.add('hidden');
+    document.querySelector('.hero') && document.querySelector('.hero');
+    document.getElementById('adminShell').classList.add('active');
+    document.querySelector('.navbar').classList.add('hidden');
+    document.body.style.paddingTop = '32px';
+    renderAdminPlayers(); renderAdminSchedule();
+    showToast('Welcome back, SIIDEX2026.', 'success');
+  } else {
+    document.getElementById('loginError').classList.remove('hidden');
+  }
+}
+function logout(){
+  document.getElementById('adminShell').classList.remove('active');
+  document.getElementById('publicView').classList.remove('hidden');
+  document.querySelector('.navbar').classList.remove('hidden');
+  showToast('Logged out.', 'success');
+}
+
+/* ---------- TABS ---------- */
+function switchTab(tab){
+  document.querySelectorAll('.tab-panel').forEach(el => el.classList.add('hidden'));
+  document.getElementById('tab-'+tab).classList.remove('hidden');
+  document.querySelectorAll('#sideNav button').forEach(b => b.classList.toggle('active', b.dataset.tab===tab));
+  const titles = {overview:['Overview','A snapshot of Riverside United FC'], players:['Player Management','Add, edit, and track every registered player'], attendance:['Attendance','Scan a Digital ID QR code to log attendance'], schedule:['Training & Tournaments','Everything on the calendar'], performance:['Performance Reports','Coach evaluations and skill breakdowns']};
+  document.getElementById('tabTitle').textContent = titles[tab][0];
+  document.getElementById('tabSubtitle').textContent = titles[tab][1];
+}
+
+/* ---------- ADMIN PLAYERS TABLE (fully interactive, in-memory) ---------- */
+function badgeClass(status){ return status==='Active'?'badge-active':status==='Pending'?'badge-pending':'badge-inactive'; }
+function renderAdminPlayers(){
+  const body = document.getElementById('playersBody');
+  if(!state.players.length){ body.innerHTML = '<tr><td colspan="5" class="empty-note">No players yet.</td></tr>'; return; }
+  body.innerHTML = state.players.map(p => `
+    <tr>
+      <td><div class="name-cell"><div class="mini-avatar">${esc(initials(p.name))}</div><div><b>${esc(p.name)}</b><span>${esc(p.id)}</span></div></div></td>
+      <td>${esc(p.category)}</td>
+      <td>${esc(p.age)}</td>
+      <td><span class="badge ${badgeClass(p.status)}">${esc(p.status)}</span></td>
+      <td><div class="row-actions">
+        <button class="icon-btn" title="Edit" onclick="openPlayerForm('${esc(p.id)}')">✎</button>
+        <button class="icon-btn danger" title="Delete" onclick="deletePlayer('${esc(p.id)}')">🗑</button>
+      </div></td>
+    </tr>`).join('');
+}
+function openPlayerForm(id){
+  state.editingPlayerId = id || null;
+  document.getElementById('playerFormTitle').textContent = id ? 'Edit Player' : 'Add Player';
+  if(id){
+    const p = state.players.find(x=>x.id===id);
+    document.getElementById('pf_name').value = p.name;
+    document.getElementById('pf_age').value = p.age;
+    document.getElementById('pf_school').value = p.school;
+    document.getElementById('pf_status').value = p.status;
+  } else {
+    document.getElementById('pf_name').value=''; document.getElementById('pf_age').value=''; document.getElementById('pf_school').value=''; document.getElementById('pf_status').value='Pending';
+  }
+  document.getElementById('playerFormModal').classList.remove('hidden');
+}
+function ageToCategory(age){ age=parseInt(age,10); if(age<=9) return 'U9'; if(age<=11) return 'U11'; if(age<=13) return 'U13'; return 'U15'; }
+function savePlayer(){
+  const name = document.getElementById('pf_name').value.trim();
+  const age = document.getElementById('pf_age').value;
+  const school = document.getElementById('pf_school').value.trim();
+  const status = document.getElementById('pf_status').value;
+  if(!name || !age){ showToast('Name and age are required.', 'error'); return; }
+  const category = ageToCategory(age);
+  if(state.editingPlayerId){
+    const p = state.players.find(x=>x.id===state.editingPlayerId);
+    Object.assign(p, {name, age, school, status, category});
+    showToast('Player updated.', 'success');
+  } else {
+    const num = state.players.filter(x=>x.category===category).length + 1;
+    const id = 'PLR-'+category+'-'+String(num).padStart(3,'0');
+    state.players.push({id, name, age, school, status, category});
+    showToast('Player added.', 'success');
+  }
+  closeModal('playerFormModal');
+  renderAdminPlayers(); renderPublicSquad();
+}
+function deletePlayer(id){
+  if(!confirm('Delete this player from the demo? (This only affects this browser session.)')) return;
+  state.players = state.players.filter(p=>p.id!==id);
+  renderAdminPlayers(); renderPublicSquad();
+  showToast('Player deleted.', 'success');
+}
+function closeModal(id){ document.getElementById(id).classList.add('hidden'); }
+
+/* ---------- ADMIN ATTENDANCE (simulated scan) ---------- */
+function simulateScan(){
+  const active = state.players.filter(p=>p.status==='Active');
+  if(!active.length){ showToast('No active players to scan.', 'error'); return; }
+  const p = active[Math.floor(Math.random()*active.length)];
+  const body = document.getElementById('attendanceBody');
+  if(body.querySelector('.empty-note')) body.innerHTML = '';
+  const time = new Date().toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  body.innerHTML = `<tr><td><div class="name-cell"><div class="mini-avatar">${esc(initials(p.name))}</div><b>${esc(p.name)}</b></div></td><td><span class="badge badge-active">Present</span></td><td class="mono">${time}</td></tr>` + body.innerHTML;
+  showToast(p.name + ' checked in.', 'success');
+}
+
+/* ---------- ADMIN SCHEDULE ---------- */
+function renderAdminSchedule(){
+  document.getElementById('scheduleBody').innerHTML = state.schedule.map(s => `
+    <tr><td>${esc(s.type)}</td><td>${esc(s.title)}</td><td class="mono">${esc(s.date)}</td><td>${esc(s.category)}</td></tr>`).join('');
+}
+
+/* ---------- TOASTS ---------- */
+function showToast(msg, type){
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type||'');
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(()=>el.remove(), 3200);
+}
+
+/* ---------- INIT ---------- */
+renderPublicSquad();
+renderPublicSchedule();
+document.getElementById('loginId').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('loginPw').focus(); });
+document.getElementById('loginPw').addEventListener('keydown', e => { if(e.key==='Enter') attemptLogin(); });
+</script>
+</body>
+</html>
